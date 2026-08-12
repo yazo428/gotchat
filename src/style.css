@@ -1,0 +1,15 @@
+body{
+  display: flex;
+  flex-direction: row;
+  max-width: 100%;
+}
+#thread-list{
+  width: 17%;
+}
+#scheduele-canvas{
+  width: 58%;
+  height: 100vh;
+}
+#thread-chat{
+  width: 25%;
+}
