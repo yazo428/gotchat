@@ -11,7 +11,11 @@ app = FastAPI()
 #       （`npm run dev`実行時にターミナルに表示されるURLを確認。デフォルトは5173系のことが多い）
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["http://localhost:5173"],  # 例: "http://localhost:5173"
+  allow_origins=[
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+  ],
   allow_methods=["POST"],
   allow_headers=["*"],
 )
