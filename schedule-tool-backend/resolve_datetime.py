@@ -1,24 +1,26 @@
 import pendulum
 from ja_timex import TimexParser
+from str_to_list import str_to_list
 
 DEFAULT_DURATION_HOUR = 1
+
 
 def apply_fragment(base, t):
     if t.type == "DURATION":
         unit = t.value[-1]
         if t.mod == "AFTER":
-            base += t.to_duration()
+          base += t.to_duration()
         elif t.mod == "BEFORE":
-            base -= t.to_duration()
+          base -= t.to_duration()
         if unit == "W" and base.weekday() != 0:
-            base = base.previous(pendulum.MONDAY)
+          base = base.previous(pendulum.MONDAY)
     elif t.type == "DATE":
-      if t.value.startswith("XXXX-WXX-"):#曜日の指定の場合
+      if t.value.startswith("XXXX-WXX-"):
         now_weekday = base.weekday()
         input_weekday = int(t.value.split("-")[-1])
-        diff = input_weekday - now_weekday -1
+        diff = input_weekday - now_weekday - 1
         base = base.add(days=diff)
-      else:#年月日の場合、入力された値に置き換える
+      else:
         year_str, month_str, day_str = t.value.split("-")
         kwargs = {}
         if "X" not in year_str:
@@ -32,8 +34,6 @@ def apply_fragment(base, t):
       hour_str, minute_str, second_str = t.value.split("-")
       kwargs = {}
       if "X" not in hour_str:
-        kwargs = {}
-      if "X" not in hour_str:
         kwargs["hour"] = int(hour_str[1:])
       if "X" not in minute_str:
         kwargs["minute"] = int(minute_str)
@@ -43,7 +43,7 @@ def apply_fragment(base, t):
     return base
 
 
-def resolve_datetime(text: str):
+def _resolve_single(text: str) -> tuple:
     now = pendulum.now()
     parser = TimexParser(reference=now)
     timexes = parser.parse(text)
@@ -51,8 +51,6 @@ def resolve_datetime(text: str):
     result = now.start_of("day")
     result_end = None
 
-    # print(result)
-    # print("------------------------------------------")
     for t in timexes:
         if (t.range_start or t.range_end) and result_end is None:
             result_end = result
@@ -66,14 +64,9 @@ def resolve_datetime(text: str):
 
     if result_end is None:
         result_end = result + pendulum.duration(hours=DEFAULT_DURATION_HOUR)
-        # print(result)
-        return result,result_end
-    # print(result, result_end)
+
     return result, result_end
 
-# if __name__ == "__main__":
-#   answer = resolve_datetime("来週の日曜の午後3時から")
-#   print("結果",answer)
-#   print("------------------------------------------")
-#   answer = resolve_datetime("明日の4時から6時まで")
-#   print("結果",answer)
+
+def resolve_datetime(text: str) -> list[tuple]:
+    return [_resolve_single(item) for item in str_to_list(text)]
